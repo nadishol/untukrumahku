@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I Love You My World 🤍</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Fredoka & Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.com/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pastelBg: '#eef6ff',
+                        pastelCard: '#ffffff',
+                        pastelBlue: '#3b82f6',
+                        pastelDarkBlue: '#1e3a8a',
+                        pastelSoftBlue: '#dbeafe',
+                        accentPink: '#f472b6'
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        cute: ['Fredoka', 'cursive'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #eef6ff;
+            color: #1e3a8a;
+            overflow-x: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .font-cute {
+            font-family: 'Fredoka', cursive;
+        }
+
+        /* Floating background items */
+        .floating-emoji {
+            position: fixed;
+            pointer-events: none;
+            z-index: 5;
+            animation: floatUp 7s linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(105vh) scale(0.6) rotate(0deg);
+                opacity: 0.9;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1.2) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Keypad press ripple & shadow */
+        .keypad-btn {
+            box-shadow: 0 4px 14px rgba(147, 197, 253, 0.35);
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .keypad-btn:active {
+            transform: scale(0.9);
+            background-color: #2563eb !important;
+            color: #ffffff !important;
+        }
+
+        /* Cute Button Hover/Active */
+        .btn-cute {
+            box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.3);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-cute:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -4px rgba(37, 99, 235, 0.4);
+        }
+        .btn-cute:active {
+            transform: scale(0.95);
+        }
+
+        /* Pin Dot style & Shake Animation */
+        .pin-dot {
+            transition: all 0.25s ease;
+        }
+        .pin-dot.filled {
+            background-color: #2563eb;
+            transform: scale(1.25);
+            box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-12px); }
+            40%, 80% { transform: translateX(12px); }
+        }
+        .shake-animation {
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        /* Smooth Screen Transitions */
+        .screen-fade {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #93c5fd;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-b from-blue-100 via-blue-50 to-indigo-100">
+
+    <!-- FLOATING BACKGROUND CONTAINER -->
+    <div id="floatingBgContainer" class="fixed inset-0 pointer-events-none z-0"></div>
+
+    <!-- 1. FLOATING AUDIO TOGGLE BUTTON -->
+    <button id="bgmToggleBtn" onclick="toggleBGM()" class="fixed top-5 right-5 z-50 bg-white/90 backdrop-blur-md border border-blue-200 text-blue-600 w-13 h-13 p-3 rounded-full flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-all duration-300">
+        <i id="bgmIcon" class="fa-solid fa-music text-xl"></i>
+    </button>
+
+    <!-- Hidden Background Music Audio Player -->
+    <audio id="bgmAudio" loop preload="auto">
+        <source src="sound.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- MAIN CARD CONTAINER -->
+    <main class="w-full max-w-md bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-6 sm:p-8 relative z-20 min-h-[580px] flex flex-col justify-center items-center text-center border border-white/80 transition-all duration-300">
+
+        <!-- SCREEN 1: PIN KEYPAD -->
+        <section id="screen-pin" class="screen-fade w-full flex flex-col items-center justify-center space-y-5">
+            <div class="w-32 h-32 flex items-center justify-center filter drop-shadow-md">
+                <img src="login.gif" alt="Login" class="w-full h-full object-contain">
+            </div>
+
+            <div class="space-y-1">
+                <h1 class="text-xl font-bold font-cute text-blue-900 leading-snug">
+                    Hi love, ayo tebak passwordnya,<br><span class="text-blue-600">I bet u knoww!!</span>
+                </h1>
+            </div>
+
+            <!-- 6 PIN Dots Indicator -->
+            <div id="pinDotsContainer" class="flex justify-center space-x-3 my-2">
+                <div class="pin-dot w-4 h-4 rounded-full border-2 border-blue-400 bg-transparent"></div>
+                <div class="pin-dot w-4 h-4 rounded-full border-2 border-blue-400 bg-transparent"></div>
+                <div class="pin-dot w-4 h-4 rounded-full border-2 border-blue-400 bg-transparent"></div>
+                <div class="pin-dot w-4 h-4 rounded-full border-2 border-blue-400 bg-transparent"></div>
+                <div class="pin-dot w-4 h-4 rounded-full border-2 border-blue-400 bg-transparent"></div>
+                <div class="pin-dot w-4 h-4 rounded-full border-2 border-blue-400 bg-transparent"></div>
+            </div>
+
+            <!-- Keypad Grid 3x4 -->
+            <div class="grid grid-cols-3 gap-3.5 w-full max-w-[280px] pt-1">
+                <button onclick="pressKey('1')" class="keypad-btn bg-blue-50/80 text-blue-800 font-bold text-xl py-3 rounded-2xl hover:bg-blue-100">1</button>
+                <button onclick="pressKey('2')" class="keypad-btn bg-blue-50/80 text-blue-800 font-bold text-xl py-3 rounded-2xl hover:bg-blue-100">2</button>
+                <button onclick="pressKey('3')" class="keypad-btn bg-blue-50/80 text-blue-800 font-bold text-xl py-3 rounded-2xl hover:bg-blue-100">3</button>
+                
+                <button onclick="pressKey('4')" class="keypad-btn bg-blue-50/80 text-blue-800 font-bold text-xl py-3 rounded-2xl hover:bg-blue-100">4</button>
+                <button onclick="pressKey('5')" class="keypad-btn bg-blue-50/80 text-blue-800 font-bold text-xl py-3 rounded-2xl hover:bg-blue-100">5</button>
+                <button onclick="pressKey('6')" class="keypad-btn bg-blue-50/80 text-blue-800 font-bold text-xl py-3 rounded-2xl hover:bg-blue-100">6</button>
+                
+                <button onclick="pressKey('7')" class="keypad-btn bg-blue-50/80 text-blue-800 font-bold text-xl py-3 rounded-2xl hover:bg-blue-100">7</button>
+                <button onclick="pressKey('8')" class="keypad-btn bg-blue-50/80 text-blue-800 font-bold text-xl py-3 rounded-2xl hover:bg-blue-100">8</button>
+                <button onclick="pressKey('9')" class="keypad-btn bg-blue-50/80 text-blue-800 font-bold text-xl py-3 rounded-2xl hover:bg-blue-100">9</button>
+                
+                <div class="py-3"></div>
+                <button onclick="pressKey('0')" class="keypad-btn bg-blue-50/80 text-blue-800 font-bold text-xl py-3 rounded-2xl hover:bg-blue-100">0</button>
+                <button onclick="pressBackspace()" class="keypad-btn bg-blue-50/80 text-blue-800 font-bold text-xl py-3 rounded-2xl hover:bg-blue-100 flex items-center justify-center">
+                    <i class="fa-solid fa-delete-left text-lg"></i>
+                </button>
+            </div>
+
+            <p class="text-xs text-blue-400 font-semibold tracking-wide pt-1">clue : my birthday</p>
+        </section>
+
+
+        <!-- SCREEN 2: GREETING INTRO -->
+        <section id="screen-greeting" class="hidden screen-fade w-full flex flex-col items-center justify-center space-y-6">
+            <div class="w-36 h-36">
+                <img src="halo.gif" alt="Halo" class="w-full h-full object-contain">
+            </div>
+            <h2 class="text-2xl font-bold font-cute text-blue-900 tracking-wide">Halooo Mas Sayang 🫶🏻</h2>
+            <button onclick="switchScreen('screen-greeting', 'screen-ready')" class="btn-cute bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-8 rounded-full text-base tracking-wide">
+                tap disini &lt;3
+            </button>
+        </section>
+
+
+        <!-- SCREEN 3: ARE YOU READY? -->
+        <section id="screen-ready" class="hidden screen-fade w-full flex flex-col items-center justify-center space-y-6">
+            <div class="w-36 h-36">
+                <img src="ready.gif" alt="Ready" class="w-full h-full object-contain">
+            </div>
+            <h2 class="text-xl font-bold font-cute text-blue-900">Are you readyy to open thisss?</h2>
+            <div class="flex space-x-4">
+                <button onclick="switchScreen('screen-ready', 'screen-wish-1')" class="btn-cute bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full">
+                    Yess
+                </button>
+                <button onclick="switchScreen('screen-ready', 'screen-angry')" class="btn-cute bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold py-3 px-8 rounded-full border border-blue-200">
+                    Noo
+                </button>
+            </div>
+        </section>
+
+        <!-- SCREEN 3.B: ANGRY CAPOO RESPONDER -->
+        <section id="screen-angry" class="hidden screen-fade w-full flex flex-col items-center justify-center space-y-6">
+            <div class="w-36 h-36">
+                <img src="marah.gif" alt="Marah" class="w-full h-full object-contain">
+            </div>
+            <h2 class="text-lg font-bold font-cute text-blue-900 uppercase tracking-wide px-2 leading-relaxed">
+                OH GITU SEKARANG KAMU SAMA AKU MAS?😡
+            </h2>
+            <button onclick="switchScreen('screen-angry', 'screen-ready')" class="btn-cute bg-blue-600 text-white font-bold py-3 px-8 rounded-full">
+                back
+            </button>
+        </section>
+
+
+        <!-- SCREEN 4: BIRTHDAY WISH CARDS (3 STEPS) -->
+        <!-- Step 1 -->
+        <section id="screen-wish-1" class="hidden screen-fade w-full flex flex-col items-center justify-center space-y-6">
+            <div class="w-36 h-36">
+                <img src="celebrate.gif" alt="Celebrate" class="w-full h-full object-contain">
+            </div>
+            <p class="text-lg font-bold font-cute text-blue-900 px-3 leading-snug">
+                Mau diulang ribuan kali pun, aku nggak pernah nyesel kenal dan sayang sama kamu. Adek sayang sama mas 🤍
+            </p>
+            <button onclick="switchScreen('screen-wish-1', 'screen-wish-2')" class="btn-cute bg-blue-600 text-white font-bold py-3.5 px-8 rounded-full">
+                open it &lt;3
+            </button>
+        </section>
+
+        <!-- Step 2 -->
+        <section id="screen-wish-2" class="hidden screen-fade w-full flex flex-col items-center justify-center space-y-6">
+            <div class="w-36 h-36">
+                <img src="love.gif" alt="Love" class="w-full h-full object-contain">
+            </div>
+            <div class="space-y-2 px-2">
+                <h2 class="text-base font-bold font-cute text-blue-900 leading-snug">
+                    Kamu selalu berhasil menarik di mataku, tanpa ini itu yang ada dirimu mas. Manusia martabak dua telurku (favorit) hehe 🤍
+                </h2>
+                <p class="text-sm text-blue-600 font-bold">I love youu so muchhh!!</p>
+            </div>
+            <button onclick="switchScreen('screen-wish-2', 'screen-wish-3')" class="btn-cute bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-sm">
+                I have something for you 💌
+            </button>
+        </section>
+
+        <!-- Step 3 -->
+        <section id="screen-wish-3" class="hidden screen-fade w-full flex flex-col items-center justify-center space-y-6">
+            <div class="w-36 h-36">
+                <img src="last.gif" alt="Last" class="w-full h-full object-contain">
+            </div>
+            <p class="text-base font-bold font-cute text-blue-900 px-4 leading-relaxed">
+                Ocaayy last one, I made something for you, read it slowly ocayyy
+            </p>
+            <button onclick="startPhotoGallery()" class="btn-cute bg-blue-600 text-white font-bold py-3 px-9 rounded-full">
+                &lt;3
+            </button>
+        </section>
+
+
+        <!-- SCREEN 5: MEMORY PHOTOS GALLERY -->
+        <section id="screen-gallery" class="hidden screen-fade w-full flex flex-col items-center justify-center space-y-5">
+            <div class="w-full bg-blue-50/70 p-3 rounded-2xl border border-blue-100 shadow-inner">
+                <div class="overflow-hidden rounded-xl h-64 w-full bg-white flex items-center justify-center shadow-sm relative">
+                    <img id="galleryImg" src="" alt="Memory Photo" class="w-full h-full object-cover transition-opacity duration-300">
+                </div>
+            </div>
+
+            <p id="galleryCaption" class="text-sm font-bold font-cute text-blue-900 px-2 min-h-[48px] flex items-center justify-center leading-relaxed">
+                Caption
+            </p>
+
+            <button onclick="nextPhoto()" class="btn-cute bg-blue-600 text-white font-bold py-3 px-8 rounded-full text-sm">
+                klik ini &lt;3
+            </button>
+        </section>
+
+
+        <!-- SCREEN 6: MUSIC PLAYLIST (SPOTIFY MOCKUP) -->
+        <section id="screen-spotify" class="hidden screen-fade w-full flex flex-col items-center justify-center space-y-5">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-sparkles text-yellow-400 text-xl"></i>
+                <h3 class="text-xl font-bold font-cute text-blue-900">Our Playlist 🎵</h3>
+            </div>
+
+            <!-- Spotify Player Container -->
+            <div class="w-full bg-slate-900 text-white p-4 rounded-2xl shadow-xl space-y-3">
+                <div class="flex items-center space-x-3 pb-2 border-b border-slate-800">
+                    <img src="https://images.unsplash.com/photo-1518895949257-7621c3c786d7?w=150&auto=format&fit=crop&q=80" alt="Album Cover" class="w-12 h-12 rounded-lg object-cover shadow">
+                    <div class="text-left flex-1 overflow-hidden">
+                        <p class="font-bold text-sm text-white truncate">for u • Lovee</p>
+                        <p class="text-xs text-slate-400">Playlist Spesial Ucapan</p>
+                    </div>
+                    <i class="fa-brands fa-spotify text-green-500 text-2xl"></i>
+                </div>
+
+                <!-- Song List Tracks -->
+                <div class="space-y-1.5 text-left text-xs max-h-48 overflow-y-auto pr-1">
+                    <div class="flex justify-between items-center text-blue-400 font-semibold p-1.5 rounded bg-slate-800/60">
+                        <span class="truncate">1. Ceritanya Jatuh Cinta (Aku Jeje)</span>
+                        <span class="text-[10px] text-slate-400 ml-2">03:07</span>
+                    </div>
+                    <div class="flex justify-between items-center text-slate-300 p-1.5 hover:bg-slate-800/40 rounded">
+                        <span class="truncate">2. Paling Cantik Sedunia - Fahmi Rahmansyah</span>
+                        <span class="text-[10px] text-slate-400 ml-2">03:39</span>
+                    </div>
+                    <div class="flex justify-between items-center text-slate-300 p-1.5 hover:bg-slate-800/40 rounded">
+                        <span class="truncate">3. Happines - Rex Orange Country</span>
+                        <span class="text-[10px] text-slate-400 ml-2">04:40</span>
+                    </div>
+                    <div class="flex justify-between items-center text-slate-300 p-1.5 hover:bg-slate-800/40 rounded">
+                        <span class="truncate">4. About You - The 1975</span>
+                        <span class="text-[10px] text-slate-400 ml-2">05:26</span>
+                    </div>
+                    <div class="flex justify-between items-center text-slate-300 p-1.5 hover:bg-slate-800/40 rounded">
+                        <span class="truncate">5. keepyousafe - Yahya, raissa anggiani</span>
+                        <span class="text-[10px] text-slate-400 ml-2">03:41</span>
+                    </div>
+                    <div class="flex justify-between items-center text-slate-300 p-1.5 hover:bg-slate-800/40 rounded">
+                        <span class="truncate">6. Best Part - Daniel Caesar</span>
+                        <span class="text-[10px] text-slate-400 ml-2">03:29</span>
+                    </div>
+                    <div class="flex justify-between items-center text-slate-300 p-1.5 hover:bg-slate-800/40 rounded">
+                        <span class="truncate">7. Amin Paling Serius - Sal Priadi, Nadin Amizah</span>
+                        <span class="text-[10px] text-slate-400 ml-2">05:06</span>
+                    </div>
+                    <div class="flex justify-between items-center text-slate-300 p-1.5 hover:bg-slate-800/40 rounded">
+                        <span class="truncate">8. Friendzone - Budi Doremi</span>
+                        <span class="text-[10px] text-slate-400 ml-2">04:34</span>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="goToLetterScreen()" class="btn-cute bg-blue-600 text-white font-bold py-3.5 px-10 rounded-full text-sm">
+                Lanjut &rarr;
+            </button>
+        </section>
+
+
+        <!-- SCREEN 7: TYPED LETTER & FLOATING ANIMATED HEARTS -->
+        <section id="screen-letter" class="hidden screen-fade w-full flex flex-col items-center justify-between min-h-[500px] space-y-4 py-1">
+            <h2 class="text-xl font-bold font-cute text-blue-900 flex items-center justify-center gap-2">
+                I Love You My Honey, My Everything, My Mine Gweh Titik 🤍🤍
+            </h2>
+
+            <!-- Typewriter Display Box -->
+            <div class="w-full bg-blue-50/60 p-5 rounded-2xl border border-blue-100 min-h-[330px] text-left text-sm leading-relaxed text-blue-950 font-medium overflow-y-auto max-h-[360px] shadow-inner" id="letterContainer">
+                <span id="typewriterText"></span>
+                <span id="cursor" class="inline-block w-2 h-4 bg-blue-600 animate-pulse"></span>
+            </div>
+
+            <button id="resetBtn" onclick="resetApp()" class="hidden btn-cute bg-blue-600 text-white font-bold py-3.5 px-8 rounded-full text-sm">
+                Kembali ke Awal
+            </button>
+        </section>
+
+    </main>
+
+    <script>
+        /* CONFIGURATION & STATE */
+        const CORRECT_PIN = "040798"; // Default 6-digit pin
+        let currentPin = "";
+
+        // Memory Photos Data
+        const galleryData = [
+            {
+                url: "images/pertama.jpeg",
+                caption: "This was our first picture, a moment I'll always remember"
+            },
+            {
+                url: "images/kedua.jpg",
+                caption: "I'm so grateful for every moment we've shared since then. How lucky I am can celebrate my birthday with my special person. I want to show u to the moon and anything mmuachh hehe"
+            },
+            {
+                url: "images/ketiga.jpg",
+                caption: "Thank you for being part of my days and making them feel special"
+            },
+            {
+                url: "images/keempat.jpg",
+                caption: "I hope we keep creating memories, big and small, together"
+            },
+            {
+                url: "images/kelima.jpg",
+                caption: "you deserve the world and I'll always love you 🤍"
+            }
+        ];
+        let currentPhotoIndex = 0;
+
+        // Long Love Letter Content
+        const letterMessage = `Haiii haii masku sayang, manusia yang tidak pernah kusangka bakal hadir dihidupku yg sederhana ini. I just want to remind you how grateful I am to have you in my life. Thank you for being the amazing person you are—kind, loving, and always making everything feel a little warmer just by being around.\n\nIni bukan prakata untuk ucapan ultah mas, ini tentang How do I express my feelings to you. How much I love u, I think the most advanced calculator cannot count the number that I always falling deeper for u, your smile, your plenger"s things, your sweetest word, your warmest hug, never forget on your deepest sun for me huhu. Maaf untuk rewel perempuan ini, maaf untuk tangisan perempuan ini, maaf untuk galaknya perempuan ini, maaf untuk bawelnya perempuan ini, maaf untuk rumitnya aku mas. Semua yang ada di aku adalah jujurku terhadapmu. Cukup mudah dan menyenangkan jadi diriku sendiri di depanmu, tidak perlu sibuk memakai costum as a superman did. Terima kasih untuk senyuman indahmu, terima kasih untuk hadirmu, terima kasih untuk sayangmu yang terkadang bentuknya susah ditebak, terima kasih untuk semua hal indah yang kamu beri, tentu terima kasih kepada bapak suyamto dan ibu nurhayati karena telah menghadirkan laki-laki baik nan rupawan ini, how lucky I am to be here. U are really my home mas 🤍✨`;
+
+        /* AUDIO CONTROLLER */
+        const bgmAudio = document.getElementById('bgmAudio');
+        const bgmIcon = document.getElementById('bgmIcon');
+        let isPlaying = false;
+
+        function toggleBGM() {
+            if (isPlaying) {
+                bgmAudio.pause();
+                bgmIcon.classList.remove('fa-spin');
+                bgmIcon.className = 'fa-solid fa-music text-xl text-blue-600';
+                isPlaying = false;
+            } else {
+                bgmAudio.play().then(() => {
+                    bgmIcon.className = 'fa-solid fa-compact-disc text-xl text-blue-600 fa-spin';
+                    isPlaying = true;
+                }).catch(err => console.log("Playback blocked:", err));
+            }
+        }
+
+        // Auto-play audio on first user touch/click
+        function autoStartAudio() {
+            if (!isPlaying) {
+                bgmAudio.play().then(() => {
+                    bgmIcon.className = 'fa-solid fa-compact-disc text-xl text-blue-600 fa-spin';
+                    isPlaying = true;
+                }).catch(() => {});
+            }
+            document.removeEventListener('click', autoStartAudio);
+            document.removeEventListener('touchstart', autoStartAudio);
+        }
+        document.addEventListener('click', autoStartAudio);
+        document.addEventListener('touchstart', autoStartAudio);
+
+        /* PIN KEYPAD SYSTEM */
+        function pressKey(num) {
+            if (currentPin.length < 6) {
+                currentPin += num;
+                updatePinDots();
+                if (currentPin.length === 6) {
+                    setTimeout(checkPin, 180);
+                }
+            }
+        }
+
+        function pressBackspace() {
+            if (currentPin.length > 0) {
+                currentPin = currentPin.slice(0, -1);
+                updatePinDots();
+            }
+        }
+
+        function updatePinDots() {
+            const dots = document.querySelectorAll('.pin-dot');
+            dots.forEach((dot, idx) => {
+                if (idx < currentPin.length) {
+                    dot.classList.add('filled');
+                } else {
+                    dot.classList.remove('filled');
+                }
+            });
+        }
+
+        function checkPin() {
+            if (currentPin === CORRECT_PIN) {
+                switchScreen('screen-pin', 'screen-greeting');
+                triggerConfetti();
+            } else {
+                const container = document.getElementById('pinDotsContainer');
+                container.classList.add('shake-animation');
+                setTimeout(() => {
+                    container.classList.remove('shake-animation');
+                    currentPin = "";
+                    updatePinDots();
+                }, 400);
+            }
+        }
+
+        /* NAVIGATION SCREEN HELPER */
+        function switchScreen(hideId, showId) {
+            const hideEl = document.getElementById(hideId);
+            const showEl = document.getElementById(showId);
+
+            if (hideEl) hideEl.classList.add('hidden');
+            if (showEl) {
+                showEl.classList.remove('hidden');
+            }
+        }
+
+        /* PHOTO GALLERY SYSTEM */
+        function startPhotoGallery() {
+            switchScreen('screen-wish-3', 'screen-gallery');
+            currentPhotoIndex = 0;
+            renderPhoto();
+        }
+
+        function renderPhoto() {
+            const imgEl = document.getElementById('galleryImg');
+            const captionEl = document.getElementById('galleryCaption');
+            
+            imgEl.style.opacity = '0';
+            setTimeout(() => {
+                imgEl.src = galleryData[currentPhotoIndex].url;
+                captionEl.innerText = galleryData[currentPhotoIndex].caption;
+                imgEl.style.opacity = '1';
+            }, 120);
+        }
+
+        function nextPhoto() {
+            if (currentPhotoIndex < galleryData.length - 1) {
+                currentPhotoIndex++;
+                renderPhoto();
+            } else {
+                switchScreen('screen-gallery', 'screen-spotify');
+            }
+        }
+
+        /* LETTER SCREEN & TYPEWRITER */
+        function goToLetterScreen() {
+            switchScreen('screen-spotify', 'screen-letter');
+            startTypewriter();
+            startFloatingBackground();
+            triggerConfetti();
+        }
+
+        function startTypewriter() {
+            const textEl = document.getElementById('typewriterText');
+            const resetBtn = document.getElementById('resetBtn');
+            const cursor = document.getElementById('cursor');
+            
+            if (!textEl || !resetBtn || !cursor) return;
+
+            textEl.innerHTML = "";
+            resetBtn.classList.add('hidden');
+            cursor.classList.remove('hidden');
+            let index = 0;
+
+            function typeChar() {
+                if (index < letterMessage.length) {
+                    let char = letterMessage.charAt(index);
+                    if (char === '\n') {
+                        textEl.innerHTML += '<br>';
+                    } else {
+                        const span = document.createElement('span');
+                        span.textContent = char;
+                        textEl.appendChild(span);
+                    }
+                    index++;
+                    setTimeout(typeChar, 30);
+                } else {
+                    cursor.classList.add('hidden');
+                    resetBtn.classList.remove('hidden');
+                }
+            }
+
+            typeChar();
+        }
+
+        /* FLOATING BACKGROUND ANIMATION */
+        let bgInterval = null;
+        function startFloatingBackground() {
+            const container = document.getElementById('floatingBgContainer');
+            const emojis = ['💙', '✨', '🪐', '🤍', '⭐', '🎈'];
+            
+            if (bgInterval) clearInterval(bgInterval);
+
+            bgInterval = setInterval(() => {
+                const item = document.createElement('div');
+                item.classList.add('floating-emoji');
+                item.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                item.style.left = Math.random() * 92 + 'vw';
+                item.style.fontSize = (Math.random() * 16 + 16) + 'px';
+                item.style.animationDuration = (Math.random() * 3 + 5) + 's';
+                
+                container.appendChild(item);
+
+                setTimeout(() => {
+                    item.remove();
+                }, 7000);
+            }, 300);
+        }
+
+        /* CONFETTI BURST EFFECT */
+        function triggerConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 70,
+                    spread: 60,
+                    origin: { y: 0.7 }
+                });
+            }
+        }
+
+        /* RESET TO START */
+        function resetApp() {
+            currentPin = "";
+            updatePinDots();
+            document.getElementById('resetBtn').classList.add('hidden');
+            document.getElementById('cursor').classList.remove('hidden');
+            if (bgInterval) clearInterval(bgInterval);
+            document.getElementById('floatingBgContainer').innerHTML = "";
+
+            const screens = document.querySelectorAll('main > section');
+            screens.forEach(s => s.classList.add('hidden'));
+            document.getElementById('screen-pin').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
